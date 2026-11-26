@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh"><meta charset="utf-8">
+<title>wrasse — 一条 finding</title>
+<style>
+  :root {
+    --bg: #0b0f14; --fg: #c9d1d9; --dim: #7d8590; --faint: #4b5563;
+    --crit: #f85149; --high: #f0883e; --path: #6e7681; --bar: #30363d;
+    --del-bg: #3d1d1d; --del-fg: #ffa198; --add-bg: #12301f; --add-fg: #7ee787;
+  }
+  body {
+    margin: 0; padding: 18px 26px 20px 22px; background: var(--bg); color: var(--fg);
+    font: 13px/1.42 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    display: inline-block;
+  }
+  .path { color: var(--path); display: flex; gap: 10px; align-items: baseline; }
+  .path .line { color: var(--faint); margin-left: auto; }
+  .rule-line { margin: 10px 0 6px; display: flex; gap: 8px; align-items: baseline; }
+  .dot { color: var(--crit); }
+  .sev { color: var(--crit); font-weight: 600; letter-spacing: .04em; }
+  .rid { color: var(--path); }
+  .dots { flex: 1; border-bottom: 1px dotted #21262d; margin: 0 6px 4px; }
+  .pos { color: var(--dim); }
+  .src { white-space: normal; }
+  .src > div { white-space: pre; }
+  .ln { color: var(--faint); display: inline-block; width: 4ch; text-align: right; }
+  .mk { display: inline-block; width: 1ch; margin-right: 2ch; }
+  .del .mk { color: var(--crit); } .add .mk { color: #3fb950; }
+  .del { background: var(--del-bg); color: var(--del-fg); display: block; padding: 1px 0; }
+  .add { background: var(--add-bg); color: var(--add-fg); display: block; padding: 1px 0; }
+  .why { color: #9aa4af; }
+  .gutter { color: var(--bar); }
+  .label { color: var(--dim); }
+  .caps { font-family: -apple-system, "Segoe UI", "PingFang SC", sans-serif; }
+</style>
+<div class="path">
+  <span>app/billing.ts</span><span class="line">1</span>
+</div>
+<div class="rule-line">
+  <span class="dot">●</span>
+  <span class="sev">严重</span>
+  <span class="rid">secret/frontend-env</span>
+  <span class="dots"></span>
+  <span class="pos">7:1</span>
+</div>
+<div class="src">
+  <div><span class="ln">5</span>  <span class="dim" style="color:var(--dim)">export const publicConfig = {</span></div>
+  <div><span class="ln">6</span>  <span style="color:var(--dim)">  publishable: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE,</span></div>
+  <div class="del"><span class="mk">-</span><span class="ln">7</span>    NEXT_PUBLIC_STRIPE_SECRET: "sk_l••••00",</div>
+  <div class="add"><span class="mk">+</span><span class="ln">7</span>    // server-side only — never expose this secret to the browser</div>
+  <div><span class="ln">8</span>  <span style="color:var(--dim)">};</span></div>
+</div>
+<div><span class="gutter">│</span> <span class="label">原因</span>  <span class="why">NEXT_PUBLIC_/VITE_/REACT_APP_ 变量会被内联进浏览器包。</span></div>
+<div><span class="gutter">└</span> <span class="label">→</span>    <span class="dim" style="color:var(--dim)">wrasse explain 1</span></div>
+</html>

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wrasse"
+version = "1.0.0-beta"
+description = "Security audit for AI-written code — deterministic, offline, no API key."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Jiaming Shi" }]
+keywords = ["security", "sast", "fastapi", "ai-generated-code", "privacy", "secrets", "cli"]
+dependencies = []
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Security",
+  "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/JiamingShi-JsPhys/wrasse"
+Source = "https://github.com/JiamingShi-JsPhys/wrasse"
+Issues = "https://github.com/JiamingShi-JsPhys/wrasse/issues"
+Changelog = "https://github.com/JiamingShi-JsPhys/wrasse/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+java = ["javalang>=0.13"]
+
+[project.scripts]
+wrasse = "wrasse.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+wrasse = ["py.typed"]

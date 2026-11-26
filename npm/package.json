@@ -1,0 +1,34 @@
+{
+  "name": "wrasse-audit",
+  "version": "1.0.0-beta",
+  "description": "Launcher for the wrasse Python CLI: deterministic security audit for AI-written code",
+  "bin": {
+    "wrasse-audit": "bin/wrasse.js"
+  },
+  "files": [
+    "bin/wrasse.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "security",
+    "sast",
+    "cli",
+    "python",
+    "secrets",
+    "static-analysis"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JiamingShi-JsPhys/wrasse.git"
+  },
+  "homepage": "https://github.com/JiamingShi-JsPhys/wrasse",
+  "bugs": {
+    "url": "https://github.com/JiamingShi-JsPhys/wrasse/issues"
+  },
+  "author": "Jiaming Shi",
+  "license": "MIT"
+}
