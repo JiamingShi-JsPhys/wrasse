@@ -6,7 +6,13 @@
 
 ```bash
 cd wrasse-1.0.0-beta
+```
+
+```bash
 python -m pip install -e . --no-deps
+```
+
+```bash
 wrasse audit examples/playground --offline
 ```
 

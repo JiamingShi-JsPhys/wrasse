@@ -28,6 +28,9 @@ beta 属于预发布版本，1.0.0 正式发布前 pip 需要加 `--pre`。
 
 ```bash
 pip install --pre wrasse
+```
+
+```bash
 wrasse --version
 ```
 
@@ -42,24 +45,66 @@ Java 的两条规则（`Cipher.getInstance("DES…")`、`MessageDigest.getInstan
 日常够用的四条：
 
 ```bash
-wrasse              # 进会话：上次扫描 + 提示符
-wrasse audit .      # 扫描当前项目
-wrasse review       # 逐条过
-wrasse explain 3    # 第 3 条为什么成立
-wrasse open 3       # 打开第 3 条所在的行
-wrasse config set lang zh  # 报告语言，存进这个项目
+wrasse
 ```
+进会话：上次扫描结果，再给一个提示符。
+
+```bash
+wrasse audit .
+```
+扫描当前项目。
+
+```bash
+wrasse review
+```
+逐条过一遍。
+
+```bash
+wrasse explain 3
+```
+第 3 条为什么成立。
+
+```bash
+wrasse open 3
+```
+打开第 3 条所在的行。
+
+```bash
+wrasse config set lang zh
+```
+报告语言，存进这个项目。
 
 要接进流程时：
 
 ```bash
-wrasse audit . --diff main                     # 只看 main 之后改动的行
-wrasse audit . --mode quick                    # 只跑 L1，适合挂 pre-commit
-wrasse audit . --format sarif --fail-on high   # CI 与代码扫描
-wrasse audit . --online --history              # 注册表核对 + 已删除的密钥
-wrasse baseline create                         # 冻结存量，之后只看新增
-wrasse preflight .                             # 把仓库交给 Agent 之前
+wrasse audit . --diff main
 ```
+只看 main 之后改动的行。
+
+```bash
+wrasse audit . --mode quick
+```
+只跑 L1，适合挂 pre-commit。
+
+```bash
+wrasse audit . --format sarif --fail-on high
+```
+CI 与代码扫描。
+
+```bash
+wrasse audit . --online --history
+```
+注册表核对，加上已删除的密钥。
+
+```bash
+wrasse baseline create
+```
+冻结存量，之后只看新增。
+
+```bash
+wrasse preflight .
+```
+把仓库交给 Agent 之前。
 
 全部命令与参数见 [docs/commands.md](docs/commands.md)。会话里也能直接敲完整命令（`audit . --focus privacy`），以及简写 `/audit`、`o 3`、`?`、`q`。敲 `/` 弹出命令菜单（`Tab` 补全、`↑↓` 选择），`/config` 打开设置面板。
 

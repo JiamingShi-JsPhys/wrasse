@@ -5,11 +5,24 @@ wrasse is a local security scanner. It is deterministic: a rule fires or it does
 ## Calling it
 
 ```bash
-wrasse preflight .                       # config only, executes nothing
-wrasse audit . --format json             # machine-readable, one object
-wrasse audit . --fail-on high            # exit 2 means the gate failed
-wrasse explain 3                         # evidence for one finding
+wrasse preflight .
 ```
+Config only, executes nothing.
+
+```bash
+wrasse audit . --format json
+```
+Machine-readable, one object.
+
+```bash
+wrasse audit . --fail-on high
+```
+Exit 2 means the gate failed.
+
+```bash
+wrasse explain 3
+```
+Evidence for one finding.
 
 Read `--format json`. It has a stable shape: `summary`, then `findings[]` with `id`, `rule`, `severity`, `status`, `file`, `line`, `why`, `fix.minus`, `fix.plus`, `evidence`.
 

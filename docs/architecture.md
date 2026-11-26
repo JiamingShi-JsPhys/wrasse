@@ -257,9 +257,14 @@ wrasse
 独立心智：**在把仓库交给 Claude Code / Cursor 之前跑一次。**
 
 ```bash
-wrasse preflight .                 # 人读
-wrasse preflight . --format json   # 给 Agent 读
+wrasse preflight .
 ```
+人读。
+
+```bash
+wrasse preflight . --format json
+```
+给 Agent 读。
 
 输出长这样：
 
@@ -285,14 +290,36 @@ wrasse preflight  ./untrusted-repo
 ### 5.3 `wrasse audit`
 
 ```bash
-wrasse audit .                          # 默认 standard，两条主线都报
-wrasse audit . --mode quick             # 提交前，<2s，只回答"会不会泄密"
-wrasse audit . --focus privacy          # 跑全量，但只报主线 A
-wrasse audit . --focus ai               # 跑全量，但只报主线 B
-wrasse audit . --mode deep             # v1.1：加语义推断
-wrasse audit . --format sarif -o wrasse.sarif
-wrasse audit . --diff main              # 只报相对 main 新增的
+wrasse audit .
 ```
+默认 `standard`，两条主线都报。
+
+```bash
+wrasse audit . --mode quick
+```
+提交前，两秒内，只回答"会不会泄密"。
+
+```bash
+wrasse audit . --focus privacy
+```
+跑全量，但只报主线 A。
+
+```bash
+wrasse audit . --focus ai
+```
+跑全量，但只报主线 B。
+
+```bash
+wrasse audit . --format sarif -o wrasse.sarif
+```
+导出给代码扫描。
+
+```bash
+wrasse audit . --diff main
+```
+只报相对 main 新增的。
+
+`--mode deep`（加语义推断）计划在 v1.1，当前版本没有这个取值。
 
 | 参数 | 取值 | 默认 | 说明 |
 |---|---|---|---|
@@ -445,7 +472,7 @@ wrasse audit .   standard · 42 files · 1.2s
 | `e` | 复制一段**可直接粘给 Claude Code 的修复请求**（路径 + 规则 + 证据 + 建议） |
 | `o` | 浏览器打开这条的 HTML 卡片 |
 | `f` | 按主线 / 严重度 / 文件过滤 |
-| `d` | dismiss 并记录理由（写进 `.wrasse/dismissed.json`） |
+| `d` | dismiss 并记录理由（计划中，当前版本未实现） |
 | `q` | 退出 |
 
 `e` 键是给"AI 写代码、AI 修代码"这个工作流准备的：不用手打上下文，选中就有一条成形的修复请求。DeepSec 的 TUI 完全没做这件事。
@@ -463,9 +490,11 @@ wrasse audit .   standard · 42 files · 1.2s
 **人只输序号，机器才用 id。**
 
 ```bash
-wrasse open 3          # 上次扫描的第 3 条，编号与结果页 [1][2][3] 一致
-wrasse dismiss 3 --reason "mitigated by gateway"
+wrasse open 3
 ```
+上次扫描的第 3 条，编号与结果页 `[1][2][3]` 一致。
+
+`d`（忽略并记录理由）是计划里的动作，当前版本没有实现，所以也不存在 `wrasse dismiss`。
 
 `WR-7f21a` 这类稳定 id 的用途是日志、基线、issue 引用和脚本——它不该由人手打。序号来自 `.wrasse/last.json`，排序与结果页完全相同。
 

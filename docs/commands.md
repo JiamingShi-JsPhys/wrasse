@@ -35,22 +35,32 @@ wrasse 只有一类操作：扫描一个目录，把结论按行给你。下面�
 ### 只看这次改了什么
 
 ```bash
-wrasse audit . --diff main          # 只报 main 之后新增行上的问题
+wrasse audit . --diff main
 ```
+只报 main 之后新增行上的问题。
 
-配合 hook 使用：
+配合 hook 使用（`quick` 只跑 L1，秒级）：
 
 ```bash
-wrasse audit . --mode quick --diff HEAD   # quick 只跑 L1，秒级
+wrasse audit . --mode quick --diff HEAD
 ```
 
 ### 存量问题先冻结，只盯新增
 
 ```bash
-wrasse baseline create              # 把当前 58 条记进 .wrasse/baseline.json
-wrasse audit . --baseline           # 之后只显示新增的
-wrasse baseline diff                # 看这次和基线差在哪
+wrasse baseline create
 ```
+把当前结果记进 `.wrasse/baseline.json`。
+
+```bash
+wrasse audit . --baseline
+```
+之后只显示基线之后新增的。
+
+```bash
+wrasse baseline diff
+```
+看这次和基线差在哪。
 
 ### 接进 CI / 代码扫描
 
@@ -63,8 +73,9 @@ SARIF 可直接上传 GitHub Code Scanning。`--fail-on` 有 `critical|high|medi
 第三方已经报过的问题可以去重：
 
 ```bash
-wrasse audit . --sarif existing.sarif   # 与已有 SARIF 重复的不再输出
+wrasse audit . --sarif existing.sarif
 ```
+与已有 SARIF 重复的不再输出。
 
 ### 控制扫描范围与深度
 
@@ -80,9 +91,14 @@ wrasse audit . --sarif existing.sarif   # 与已有 SARIF 重复的不再输出
 ### 联网与历史
 
 ```bash
-wrasse audit . --online     # 到 PyPI / npm 核对包是否存在、版本是否存在（默认离线）
-wrasse audit . --history    # 扫 git 历史里已删除但仍可提取的密钥
+wrasse audit . --online
 ```
+到 PyPI / npm 核对包是否存在、版本是否存在（默认离线）。
+
+```bash
+wrasse audit . --history
+```
+扫 git 历史里已删除但仍可提取的密钥。
 
 `--online` 是唯一会让数据离开本机的东西，运行时会明说查了哪些包。`--history` 需要目录是 git 仓库。
 
@@ -91,12 +107,29 @@ wrasse audit . --history    # 扫 git 历史里已删除但仍可提取的密钥
 设置存在项目里的 `.wrasse/config.json`，可以提交进仓库，让团队和 CI 用同一套：
 
 ```bash
-wrasse config                       # 当前值与来源（默认值会标出来）
-wrasse config set lang zh           # 这个项目以后都出中文
-wrasse config set fail_on critical  # CI 只拦 critical
-wrasse config set mode quick        # 默认只跑 L1
+wrasse config
+```
+当前值与来源（默认值会标出来）。
+
+```bash
+wrasse config set lang zh
+```
+这个项目以后都出中文。
+
+```bash
+wrasse config set fail_on critical
+```
+CI 只拦 critical。
+
+```bash
+wrasse config set mode quick
+```
+默认只跑 L1。
+
+```bash
 wrasse config unset lang
 ```
+删掉这一项，回到默认。
 
 可设的键：`lang`（`en`/`zh`）、`fail_on`（`critical`/`high`/`medium`/`low`/`none`）、`mode`（`quick`/`standard`）、`focus`（`privacy`/`ai`/`all`）。文件本体就是一串键值：
 
@@ -111,32 +144,52 @@ wrasse config unset lang
 ### 输出与机器消费
 
 ```bash
-wrasse audit . --format json              # 完整结构，含证据与 id
-wrasse audit . --format html -o r.html    # 单文件，离线可看
-wrasse audit . --no-state                 # 不写 .wrasse/last.json（CI 里用）
+wrasse audit . --format json
 ```
+完整结构，含证据与 id。
+
+```bash
+wrasse audit . --format html -o r.html
+```
+单文件，离线可看。
+
+```bash
+wrasse audit . --no-state
+```
+不写 `.wrasse/last.json`（CI 里用）。
 
 ### 规则本身
 
 ```bash
-wrasse rules list                    # 62 条，按主线分组
-wrasse rules show authz/route-without-auth   # 单条：判定、状态、为什么、怎么改
-wrasse rules export --format md --lang zh -o rules.md   # 导出整份清单
+wrasse rules list
 ```
+62 条，按主线分组。
+
+```bash
+wrasse rules show authz/route-without-auth
+```
+单条：判定、状态、为什么、怎么改。
+
+```bash
+wrasse rules export --format md --lang zh -o rules.md
+```
+导出整份清单。
 
 ### 把仓库交给 AI 之前
 
 ```bash
-wrasse preflight .        # 只看"这个仓库能不能放心让 Agent 打开"
+wrasse preflight .
 ```
+只看"这个仓库能不能放心让 Agent 打开"。
 
 专查：`.env` 是否被忽略、Agent 配置里有没有可疑命令、配置里有没有密钥、有没有对外隧道。
 
 ### 环境
 
 ```bash
-wrasse doctor             # Python 版本、可选依赖（javalang）、状态目录、网络开关
+wrasse doctor
 ```
+Python 版本、可选依赖（javalang）、状态目录、网络开关。
 
 ---
 

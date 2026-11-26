@@ -28,6 +28,9 @@ The beta is a pre-release, so pip needs `--pre` until 1.0.0 is tagged.
 
 ```bash
 pip install --pre wrasse
+```
+
+```bash
 wrasse --version
 ```
 
@@ -42,24 +45,66 @@ Java: `Cipher.getInstance("DES…")` and `MessageDigest.getInstance("MD5")` are 
 Day to day:
 
 ```bash
-wrasse              # session: last scan, then a prompt
-wrasse audit .      # scan the current project
-wrasse review       # step through the findings
-wrasse explain 3    # why the third one is a finding
-wrasse open 3       # open it at its line
-wrasse config set lang zh  # report language, saved for this project
+wrasse
 ```
+Start the session: the last scan, then a prompt.
+
+```bash
+wrasse audit .
+```
+Scan the current project.
+
+```bash
+wrasse review
+```
+Step through the findings.
+
+```bash
+wrasse explain 3
+```
+Why the third one is a finding.
+
+```bash
+wrasse open 3
+```
+Open it at its line.
+
+```bash
+wrasse config set lang zh
+```
+Report language, saved for this project.
 
 Wiring it in:
 
 ```bash
-wrasse audit . --diff main                     # only lines changed since main
-wrasse audit . --mode quick                    # L1 only, fits a pre-commit hook
-wrasse audit . --format sarif --fail-on high   # CI and code scanning
-wrasse audit . --online --history              # registry checks, deleted keys
-wrasse baseline create                         # freeze what you already have
-wrasse preflight .                             # before letting an agent open a repo
+wrasse audit . --diff main
 ```
+Only lines changed since main.
+
+```bash
+wrasse audit . --mode quick
+```
+L1 only, fast enough for a pre-commit hook.
+
+```bash
+wrasse audit . --format sarif --fail-on high
+```
+CI and code scanning.
+
+```bash
+wrasse audit . --online --history
+```
+Registry checks and deleted keys.
+
+```bash
+wrasse baseline create
+```
+Freeze what you already have.
+
+```bash
+wrasse preflight .
+```
+Before letting an agent open a repo.
 
 Every command and flag: [docs/commands.md](docs/commands.md). Inside the session a full command works too (`audit . --focus privacy`), plus `/audit`, `o 3`, `?` and `q`. Typing `/` opens a command menu (`Tab` completes, `↑↓` moves); `/config` opens the settings panel.
 
