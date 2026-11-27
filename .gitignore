@@ -1,0 +1,9 @@
+**/.wrasse/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+report.html
+node_modules/
+*.tgz

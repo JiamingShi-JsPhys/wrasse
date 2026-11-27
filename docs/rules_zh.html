@@ -1,0 +1,585 @@
+<!doctype html><html lang="zh"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>wrasse 规则清单</title>
+<style>
+ body{margin:0;background:#0b0f14;color:#c9d1d9;padding:40px 24px 100px;
+      font:13px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}
+ main{max-width:900px;margin:0 auto}
+ h1{font:600 16px/1.4 -apple-system,"Segoe UI","PingFang SC",sans-serif;color:#e6edf3;margin:0 0 4px}
+ .lede{color:#6e7681;margin:0 0 28px;font-family:-apple-system,"Segoe UI","PingFang SC",sans-serif}
+ h2{font:600 14px/1.4 -apple-system,"Segoe UI","PingFang SC",sans-serif;color:#e6edf3;margin:36px 0 2px}
+ .sub{color:#6e7681;margin:0 0 14px;font-family:-apple-system,"Segoe UI","PingFang SC",sans-serif}
+ .entry{border:1px solid #1e2733;border-radius:8px;background:#0d1219;padding:14px 16px;margin:0 0 14px}
+ .head{display:flex;gap:10px;align-items:baseline;margin-bottom:8px}
+ .dot{font-size:12px} .sev{font-weight:600;font-size:12px;letter-spacing:.04em}
+ .crit{color:#f85149} .high{color:#f0883e} .med{color:#d29922} .low{color:#58a6ff}
+ .q{color:#d29922;font-weight:700} .rule{color:#6e7681;font-size:12px}
+ pre{margin:0;padding:0;white-space:pre-wrap;font:inherit}
+ .ln{color:#4b5563} .dim{color:#7d8590} .mk{display:inline-block;width:1ch}
+ .del-mk{color:#f85149} .add-mk{color:#3fb950}
+ .del{color:#ffa198;background:#3d1d1d} .add{color:#7ee787;background:#12301f}
+ .note{margin-top:6px;color:#6e7681} .bar{color:#30363d} .why{color:#9aa4af}
+</style>
+<main>
+<h1>wrasse 规则清单</h1>
+<p class="lede">共 62 条。由 `wrasse rules export` 从 `src/wrasse/rules.py` 生成，请勿手改。</p>
+<h2>A · 隐私</h2><p class="sub">这段代码会不会把东西漏出去？</p>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">agent/env-not-ignored</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> .gitignore:  .env</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">.env 存在，且未被版本控制或助手索引排除。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show agent/env-not-ignored</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">error/stack-to-client</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> {&quot;error&quot;: &quot;internal_error&quot;}</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">堆栈信息会向任何触发异常者披露文件路径、SQL 语句与依赖版本。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show error/stack-to-client</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">leak/machine-path</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> {fix_machine}</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">用户名、家目录或内网地址会向仓库读者披露主机布局。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show leak/machine-path</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">log/sensitive-field</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> &quot;[redacted]&quot;</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">日志会持久化并被采集，留存时间远长于产生它的请求。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show log/sensitive-field</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">response/model-leaks-secret</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # remove this field from the response schema</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">响应模型默认会序列化这些字段。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show response/model-leaks-secret</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">secret/assignment-entropy</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> os.environ[&quot;API_KEY&quot;]</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">标识符表明其为密钥，字面量熵值足以排除占位符。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show secret/assignment-entropy</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot crit">●</span>
+      <span class="sev crit">严重</span> 
+      <span class="rule">secret/default-credentials</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # provision the first user from an environment secret</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">默认口令是自动化登录攻击最先尝试的组合。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show secret/default-credentials</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot crit">●</span>
+      <span class="sev crit">严重</span> 
+      <span class="rule">secret/frontend-env</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> // server-side only — never expose this value to the browser</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">NEXT_PUBLIC_、VITE_、REACT_APP_ 变量在构建时被内联进客户端产物。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show secret/frontend-env</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot crit">●</span>
+      <span class="sev crit">严重</span> 
+      <span class="rule">secret/in-frontend-bundle</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> // server-side only — never expose this value to the browser</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">服务商密钥字面量出现在浏览器可下载的文件中。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show secret/in-frontend-bundle</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot crit">●</span>
+      <span class="sev crit">严重</span> 
+      <span class="rule">secret/in-git-history</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # rotate this credential — deleting the line is not enough</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">删除该行不会清除已有克隆、fork 与 CI 缓存中的副本。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show secret/in-git-history</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot crit">●</span>
+      <span class="sev crit">严重</span> 
+      <span class="rule">secret/private-key-block</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # load the key from a secret manager or a path outside the repo</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">可在被追踪的文件中读取到 PEM 私钥内容。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show secret/private-key-block</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot crit">●</span>
+      <span class="sev crit">严重</span> 
+      <span class="rule">secret/provider-key</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> os.environ[&quot;API_KEY&quot;]</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该值符合公开服务商的凭证格式，并以明文形式存放在源码树中。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show secret/provider-key</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">upload/path-from-filename</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> target = (Path(BASE) / name).resolve()</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">含路径分隔符或 .. 的文件名会解析到上传目录之外。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show upload/path-from-filename</div>
+  </section><h2>B · AI 的坑</h2><p class="sub">AI 少写了什么？</p>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">agent/hidden-instructions</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # delete every invisible character; retype the file from a trusted source</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">零宽与双向控制字符可承载在人工审查中不可见的指令。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show agent/hidden-instructions</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">api/unbounded-query</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> .limit(page_size).offset(page * page_size)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">处理函数返回查询命中的全部行，结果集随表增长。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show api/unbounded-query</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">auth/insecure-token-source</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> secrets.token_urlsafe(32)  /  crypto.randomBytes(32)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">Math.random 与 random.random 不是密码学安全随机，后续值可预测。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show auth/insecure-token-source</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">auth/jwt-misuse</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> jwt.decode(token, key, algorithms=[&quot;RS256&quot;])</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">alg:none 接受未签名令牌；密钥字面量对任何持有源码者可见。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show auth/jwt-misuse</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">auth/md5-sha1-password</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # use bcrypt/argon2: bcrypt.hashpw(pw, bcrypt.gensalt(12))</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">两种摘要算法在通用 GPU 上可达每秒数十亿次尝试。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show auth/md5-sha1-password</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">auth/weak-password-hash</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> bcrypt.hash(pw, 12)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">cost 为 4 时，离线攻击可在数秒内穷举完毕。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show auth/weak-password-hash</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">authz/admin-route-unprotected</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> Depends(require_admin)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该路由要求认证但不要求角色，任何已登录账户均可访问管理路径。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show authz/admin-route-unprotected</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">authz/mass-assignment</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # keep is_admin out of the input model; set it server-side</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">请求体直接绑定到模型，包含表示权限的字段。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show authz/mass-assignment</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">authz/partial-role-check</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> owner_id=user.id</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">归属校验位于单一角色分支内，其他角色不经过该检查。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show authz/partial-role-check</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">authz/query-without-owner</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> owner_id=user.id</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">调用方提供的标识符直接进入数据库，本函数内无 owner/tenant 约束。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show authz/query-without-owner</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">authz/route-without-auth</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> user=Depends(get_current_user)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该路由没有通过 Depends、路由级依赖或中间件绑定身份。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show authz/route-without-auth</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">code/command-injection</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> subprocess.run([cmd, *args], shell=False)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">shell 会解释值中的元字符，; 或 $() 可启动第二条命令。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/command-injection</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">code/dynamic-eval</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> json.loads(value)  # or an explicit dispatch table</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该值被作为源码执行。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/dynamic-eval</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">code/fail-open</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> except Exception: return False</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">except 分支返回 True，校验过程中的异常被当作通过。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/fail-open</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">code/nosql-injection</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> collection.find({&#x27;user_id&#x27;: user.id})</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">查询条件由请求数据构成，可携带 $gt、$where 等操作符。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/nosql-injection</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">code/open-redirect</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> redirect(next_path if next_path.startswith(&quot;/&quot;) else &quot;/&quot;)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">跳转目标取自请求，本域名下的链接可被导向其他站点。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/open-redirect</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">code/sql-string-built</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> execute(&quot;... WHERE id = ?&quot;, (value,))</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该值以 SQL 文本形式而非绑定参数进入数据库。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/sql-string-built</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">code/ssrf</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> requests.get(url, allow_redirects=False)  # after host allowlist check</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">URL 未经主机白名单即进入 HTTP 客户端，可指向内网服务。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/ssrf</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">code/ssti</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> render_template(&quot;page.html&quot;, value=user)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">请求值被当作模板编译，模板语法因而被执行。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/ssti</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">code/unsafe-deserialization</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> json.loads(payload)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">pickle 与 yaml.load 在解析过程中调用构造器。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/unsafe-deserialization</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">code/weak-crypto</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # AES-GCM with a key from the environment</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">所用算法或模式已废弃或泄露结构；密钥以字面量存于源码。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/weak-crypto</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">code/xss-output</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> {fix_escape}</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该值以标记形式输出，其中的标签会作为脚本执行。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show code/xss-output</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">config/allowed-hosts-wildcard</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> + ALLOWED_HOSTS = [&quot;app.example.com&quot;]</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">主机名通配时接受任意 Host 头，包括攻击者控制的值。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/allowed-hosts-wildcard</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">config/api-docs-public</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> FastAPI(docs_url=None, openapi_url=None)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">OpenAPI 文档与文档界面在无认证的情况下对外提供。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/api-docs-public</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">config/autoescape-off</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> autoescape=True</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">自动转义被关闭，所有插值均按标记输出。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/autoescape-off</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">config/cookie-flags</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> secure: true, httpOnly: true</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">缺少 HttpOnly 时脚本可读取该 cookie；缺少 Secure 时会经明文 HTTP 传输。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/cookie-flags</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">config/cors-wildcard-credentials</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> allow_origins=[&quot;https://app.example.com&quot;]</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">通配来源与凭证同时开启时，任意站点可读取带身份的响应。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/cors-wildcard-credentials</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">config/csrf-exempt</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # remove @csrf_exempt, or add a narrow, reviewed control</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">持有会话 cookie 的浏览器可被任意站点驱使提交该请求。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/csrf-exempt</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">config/debug-enabled</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> DEBUG = os.getenv(&quot;DEBUG&quot;, &quot;false&quot;) == &quot;true&quot;</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">调试模式会暴露交互式堆栈，部分框架还暴露控制台。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/debug-enabled</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">config/host-check-disabled</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # list the hosts you serve: ALLOWED_HOSTS = [&#x27;app.example.com&#x27;]</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">Host 头校验被关闭，任意主机名均被接受。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/host-check-disabled</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot crit">●</span>
+      <span class="sev crit">严重</span> 
+      <span class="rule">config/object-storage-public-acl</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> ACL: &quot;private&quot;</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">存储桶 ACL 允许公开写入，任何持有 URL 者可修改或删除对象。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/object-storage-public-acl</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">config/rate-limit-key</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # key on the authenticated identity, or the first X-Forwarded-For hop you trust</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">以代理地址为键时，所有客户端共用同一配额。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/rate-limit-key</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">config/tls-verification-off</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> verify=True  # or point at a trusted CA bundle</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">证书校验被关闭，任何中间人都被信任。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show config/tls-verification-off</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">deps/insecure-source</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> git+https://... or https://...</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">依赖通过明文 HTTP 获取，中间人可替换该归档。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show deps/insecure-source</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> 
+      <span class="rule">deps/lockfile-integrity</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> npm install --package-lock-only   # regenerate with integrity hashes</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">缺少完整性哈希时，注册表或镜像可替换包内容而不被发现。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show deps/lockfile-integrity</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">deps/new-package</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # check the maintainer and download count before installing</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该包首次发布时间很近；抢注投毒会提前注册被臆造的包名。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show deps/new-package</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">deps/package-not-found</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> - {name}</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该名称在注册表中不存在；安装它等同于执行抢注者的代码。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show deps/package-not-found</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">deps/typosquat</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> - {name}</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">名称与流行包编辑距离为 1，属仿冒包的典型特征。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show deps/typosquat</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">deps/undeclared-import</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # add {module} to requirements / pyproject</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该模块被导入，但没有任何清单声明它；干净环境安装后导入失败。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show deps/undeclared-import</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> 
+      <span class="rule">deps/version-not-found</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> - {name}{spec}</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">包存在，但指定版本从未发布。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show deps/version-not-found</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">input/untyped-body</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> payload: UpdateUser</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">字段直接从请求读取，绕过了模型对类型与范围的校验。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show input/untyped-body</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">license/mismatch</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # make the declaration and LICENSE agree</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">声明与 LICENSE 文件不一致，而下游据此判断是否可用。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show license/mismatch</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">log/injection</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # logger.info(&quot;login %s&quot;, clean(user))</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">值中的换行会在用于事件复盘的日志中伪造一条记录。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show log/injection</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">net/ephemeral-host</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # use a domain you own and control</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">该域名到期后会被他人回收，后续注册者将收到同一流量。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show net/ephemeral-host</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">net/request-without-timeout</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> requests.get(url, timeout=10)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">未设置超时的请求会一直占用 worker，直至对端关闭连接。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show net/request-without-timeout</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot med">●</span>
+      <span class="sev med">中危</span> <span class="q">?</span>
+      <span class="rule">response/pii-fields</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # return a masked value: &#x27;****1234&#x27;</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">响应携带身份或支付标识符，其留存范围超出该请求。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show response/pii-fields</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">spring/cors-wildcard</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> @CrossOrigin(origins = &quot;https://app.example.com&quot;)</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">未限定来源的 @CrossOrigin 接受任意站点；配合凭证即泄露已认证会话。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show spring/cors-wildcard</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> 
+      <span class="rule">spring/csrf-disabled</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> # http.csrf(Customizer.withDefaults())</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">CSRF 保护被关闭，持有会话 cookie 的浏览器可被驱使提交状态变更请求。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show spring/csrf-disabled</div>
+  </section>
+  <section class="entry">
+    <div class="head"><span class="dot high">●</span>
+      <span class="sev high">高危</span> <span class="q">?</span>
+      <span class="rule">spring/permit-all</span></div>
+    <pre><span class="mk del-mk">-</span><span class="ln">   1</span>  <span class="del"> &lt;这行代码&gt;</span>
+<span class="mk add-mk">+</span><span class="ln">   1</span>  <span class="add"> .requestMatchers(&quot;/public/**&quot;).permitAll()  # and authenticated() elsewhere</span></pre>
+    <div class="note"><span class="bar">│</span> <span class="dim">why</span>  <span class="why">permitAll() 使该匹配器覆盖的所有路径不需要认证。</span></div>
+    <div class="note"><span class="bar">└</span> <span class="dim">→</span>    wrasse rules show spring/permit-all</div>
+  </section>
+</main></html>

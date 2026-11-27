@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>怎么看 wrasse 的报告</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#11161d; --line:#1e2733; --line-soft:#161d27;
+    --fg:#c9d1d9; --dim:#8b949e; --faint:#6e7681;
+    --crit:#f85149; --high:#f0883e; --med:#d29922; --low:#58a6ff;
+    --ok:#3fb950; --path:#a8b3bd; --rule:#6e7681;
+    --del-bg:#3d1d1d; --add-bg:#12301f; --hl:#2b2118;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font:15px/1.75 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+  code{background:#161d27; padding:.12em .38em; border-radius:4px; font-size:.9em; color:#e6edf3}
+
+  .layout{display:grid; grid-template-columns:250px minmax(0,820px); gap:48px;
+          max-width:1160px; margin:0 auto; padding:40px 24px 120px}
+  @media (max-width:960px){ .layout{grid-template-columns:1fr; gap:24px} nav.toc{position:static!important; order:-1} }
+
+  nav.toc{position:sticky; top:32px; align-self:start; font-size:13px; line-height:1.5}
+  nav.toc h2{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint);
+             margin:0 0 10px; font-weight:600}
+  nav.toc a{display:block; padding:5px 10px; color:var(--dim); text-decoration:none;
+            border-left:2px solid transparent; border-radius:0 4px 4px 0}
+  nav.toc a:hover{color:#e6edf3; background:#11161d; border-left-color:var(--line)}
+
+  header.page{margin-bottom:36px}
+  header.page h1{font-size:26px; line-height:1.25; margin:0 0 8px; color:#e6edf3; font-weight:600}
+  header.page .lede{color:var(--dim); margin:0 0 18px}
+  .run{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 16px;
+       font-size:13px; color:var(--dim)}
+  .run code{background:none; color:var(--ok); padding:0}
+
+  section{margin:0 0 44px; scroll-margin-top:24px}
+  section h2{font-size:18px; margin:0 0 4px; color:#e6edf3; font-weight:600}
+  section h2 .num{color:var(--faint); font-weight:400; margin-right:10px; font-variant-numeric:tabular-nums}
+  section .sub{color:var(--faint); font-size:13px; margin:0 0 18px}
+  h3{font-size:14px; color:#e6edf3; margin:26px 0 10px; font-weight:600}
+  p{margin:0 0 14px}
+  ul{margin:0 0 16px; padding-left:22px}
+  li{margin:4px 0}
+  li::marker{color:var(--faint)}
+
+  .term{background:#0a0e13; border:1px solid var(--line); border-radius:8px;
+        padding:16px 18px; overflow-x:auto; margin:0 0 16px; font-size:12.5px; line-height:1.7}
+  .term pre{margin:0; white-space:pre}
+
+  .crit{color:var(--crit)} .high{color:var(--high)} .med{color:var(--med)} .low{color:var(--low)}
+  .ok{color:var(--ok)} .p{color:var(--path)} .r{color:var(--rule)} .dim{color:var(--dim)} .faint{color:var(--faint)}
+  .b{color:#e6edf3; font-weight:600}
+  .ln{color:#4b5563}
+  .del{color:#ffa198; background:var(--del-bg)}
+  .add{color:#7ee787; background:var(--add-bg)}
+  .hl{background:var(--hl)}
+
+  table{width:100%; border-collapse:collapse; margin:0 0 18px; font-size:13.5px}
+  th,td{border:1px solid var(--line-soft); padding:8px 12px; text-align:left; vertical-align:top}
+  th{background:#0f141b; color:#e6edf3; font-weight:600; font-size:12.5px}
+  td{color:var(--dim)}
+  td strong{color:#e6edf3; font-weight:600}
+  tr:hover td{background:#0f141b}
+
+  .callout{border-left:3px solid var(--line); background:var(--panel); padding:12px 16px;
+           border-radius:0 6px 6px 0; margin:0 0 16px; color:var(--dim); font-size:13.5px}
+  .callout strong{color:#e6edf3}
+  .callout.warn{border-left-color:var(--med)}
+  .callout.ok{border-left-color:var(--ok)}
+
+  .anatomy{display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:20px; align-items:start}
+  @media (max-width:800px){ .anatomy{grid-template-columns:1fr} }
+  ol.parts{margin:0; padding-left:20px; font-size:13px; color:var(--dim); line-height:1.6}
+  ol.parts li{margin:9px 0}
+  ol.parts b{color:#e6edf3; display:block; font-weight:600}
+
+  footer{border-top:1px solid var(--line); padding-top:20px; color:var(--faint); font-size:12.5px}
+
+  @media print{
+    body{background:#fff; color:#111}
+    nav.toc{display:none}
+    .layout{display:block; max-width:none; padding:0}
+    .term{background:#f6f8fa; border-color:#ddd; color:#111}
+    .crit,.high,.med,.low,.ok,.p,.r,.dim,.faint,.ln{color:#333}
+    .del{background:#ffecec; color:#7a1f1f}
+    .add{background:#eaf7ee; color:#12562a}
+    th,td{border-color:#ddd} td{color:#333}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h2>目录</h2>
+  <a href="#s1">一 · 一份完整输出</a>
+  <a href="#s2">二 · 第一行：这次怎么跑的</a>
+  <a href="#s3">三 · 第二行：多少、多严重</a>
+  <a href="#s4">四 · 文件名那一行</a>
+  <a href="#s5">五 · 一条 finding 的七个部分</a>
+  <a href="#s6">六 · 严重度 vs 状态</a>
+  <a href="#s7">七 · 尾部两行</a>
+  <a href="#s8">八 · 为什么条数会变</a>
+  <a href="#s9">九 · 退出码</a>
+  <a href="#s10">十 · 命令列表</a>
+  <a href="#s11">十一 · 术语</a>
+  <a href="#s12">十二 · 它不能告诉你的</a>
+</nav>
+
+<main>
+
+<header class="page">
+  <h1>怎么看 wrasse 的报告</h1>
+  <p class="lede">每个数字、每个符号、每条命令。全篇用 <code>examples/playground</code> 的真实输出讲。</p>
+  <div class="run">自己跑一遍对照着看：<code>wrasse audit examples/playground --offline</code></div>
+</header>
+
+<section id="s1">
+  <h2><span class="num">01</span>一份完整输出</h2>
+  <p class="sub">下面这份就是终端的原样，配色与真实运行一致。</p>
+  <div class="term"><pre><span class="dim">wrasse audit examples/playground</span>   <span class="faint">standard · 6 files · context 2 · 0.0s</span>
+
+  <span class="crit b">1 critical</span>   <span class="high b">8 high</span>   <span class="med b">2 medium</span>   <span class="faint">· 11 findings</span>
+
+  <span class="p b">app/billing.ts</span> <span class="faint">─────────────────────────────────────────────────────</span> <span class="faint">1</span>
+
+    <span class="crit">●</span> <span class="crit b">CRITICAL</span>   <span class="r">secret/frontend-env</span> <span class="faint">...............................</span> <span class="p">7:1</span>
+      <span class="ln">5</span>  <span class="dim">export const publicConfig = {</span>
+      <span class="ln">6</span>  <span class="dim">  publishable: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE,</span>
+      <span class="del">  -   NEXT_PUBLIC_STRIPE_SECRET: "sk_l••••00",</span>
+      <span class="add">  +   // server-side only — never expose this secret to the browser</span>
+      <span class="ln">8</span>  <span class="dim">};</span>
+      <span class="ln">9</span>
+    <span class="faint">│</span> <span class="dim">why</span>  <span style="color:#9aa4af">NEXT_PUBLIC_/VITE_/REACT_APP_ variables are inlined into the browser bundle.</span>
+    <span class="faint">└</span> <span class="dim">→</span>    <span class="dim">wrasse explain 1</span>
+
+  <span class="p b">app/main.py</span> <span class="faint">────────────────────────────────────────────────────────</span> <span class="faint">5</span>
+
+    <span class="high">●</span> <span class="high b">HIGH</span>   <span class="r">authz/route-without-auth</span> <span class="faint">.............................</span> <span class="p">11:1</span>
+      <span class="dim">…</span></pre></div>
+</section>
+
+<section id="s2">
+  <h2><span class="num">02</span>第一行：这次扫描是怎么跑的</h2>
+  <p class="sub">这四个字段决定了下面所有内容的可信度。</p>
+  <div class="term"><pre><span class="dim">wrasse audit examples/playground</span>   <span class="b">standard</span> · <span class="b">6 files</span> · <span class="b">context 2</span> · <span class="b">0.0s</span>
+<span class="faint">└─────────── 你敲的命令 ──────────┘   模式    文件数     上下文    耗时</span></pre></div>
+  <table>
+    <tr><th>字段</th><th>含义</th><th>注意</th></tr>
+    <tr><td><strong>standard</strong></td><td>扫描深度。<code>quick</code> 只跑隐私线，<code>standard</code> 加数据流和授权</td><td>决定 <code>.wrasse/last.json</code> 里存的是什么</td></tr>
+    <tr><td><strong>6 files</strong></td><td>实际读过的文件数，已排除 <code>.git</code> / <code>node_modules</code> / <code>.venv</code> / <code>tests</code> / 构建产物</td><td>加 <code>--include-tests</code> 会把测试目录算进来</td></tr>
+    <tr><td><strong>context 2</strong></td><td>每条 finding 上下各显示 2 行源码</td><td><code>--context 0</code> 关掉，<code>--context 5</code> 加宽</td></tr>
+    <tr><td><strong>0.0s</strong></td><td>解析与检测的总耗时，不含渲染</td><td>2500 文件的真实项目约 4 秒</td></tr>
+  </table>
+</section>
+
+<section id="s3">
+  <h2><span class="num">03</span>第二行：一共多少、多严重</h2>
+  <div class="term"><pre>  <span class="crit b">1 critical</span>   <span class="high b">8 high</span>   <span class="med b">2 medium</span>   <span class="faint">· 11 findings</span>
+  <span class="faint">└── 按严重度分组 ──┘              └─ 总条数 ─┘</span></pre></div>
+  <table>
+    <tr><th>英文</th><th>中文（<code>--lang zh</code>）</th><th>什么算这个级别</th><th>拦 CI</th></tr>
+    <tr><td><span class="crit b">CRITICAL</span></td><td>严重</td><td>密钥已暴露、任意代码执行</td><td>是</td></tr>
+    <tr><td><span class="high b">HIGH</span></td><td>高危</td><td>未授权访问、注入、路径穿越</td><td>是（默认阈值）</td></tr>
+    <tr><td><span class="med b">MEDIUM</span></td><td>中危</td><td>需要更多条件才成立的泄露</td><td>否</td></tr>
+    <tr><td><span class="low b">LOW</span></td><td>低危</td><td>信息性问题</td><td>否</td></tr>
+  </table>
+  <p>四个级别用的是国际通用分类（CVSS / GitHub / Snyk 同一套词），没有自创。分组里只显示<strong>实际出现过的级别</strong>——全是 high 时不会出现 <code>0 critical</code> 这种噪声。</p>
+  <div class="callout"><strong>总条数 ≠ 要改的地方数。</strong>同一个文件里 5 条就是 5 处；但同一个文件的同一行只会报一条（见第九节）。</div>
+</section>
+
+<section id="s4">
+  <h2><span class="num">04</span>文件名那一行</h2>
+  <div class="term"><pre>  <span class="p b">app/billing.ts</span> <span class="faint">──────────────────────────────────────────</span> <span class="faint">1</span>
+  <span class="faint">└── 相对路径 ──┘                                        └ 本文件几条</span></pre></div>
+  <ul>
+    <li>路径相对<strong>你扫描的那个目录</strong>，不是磁盘根——可以直接复制去打开。</li>
+    <li>条目<strong>按文件分组、组内按严重度排序</strong>。人是按文件改代码的，不是按规则改。</li>
+    <li>右边的数字是这个文件里的条数，和总数是两回事。</li>
+  </ul>
+</section>
+
+<section id="s5">
+  <h2><span class="num">05</span>一条 finding 的七个部分</h2>
+  <p class="sub">这是全篇最值得看的一节。</p>
+  <div class="anatomy">
+    <div class="term"><pre><span class="dim"> </span><span class="ln">    42</span>  <span class="dim">    """Return one order."""</span>
+<span class="dim"> </span><span class="ln">    43</span>
+<span class="crit">-</span><span class="ln">   44</span>  <span class="del">      order = await db.get(Order, order_id)</span>
+<span class="ok">+</span><span class="ln">   44</span>  <span class="add">      order = await db.scalar(select(Order).where(Order.id == order_id, ...))</span>
+<span class="dim"> </span><span class="ln">    45</span>  <span class="dim">    return order</span>
+    <span class="faint">│</span> <span class="dim">why</span>  <span style="color:#9aa4af">A caller-supplied id reaches the database; no owner/tenant constraint…</span>
+    <span class="faint">│</span> <span class="med">?</span>    <span class="dim">no owner/tenant constraint in this function</span>
+    <span class="faint">└</span> <span class="dim">→</span>    <span class="dim">wrasse explain 3</span></pre></div>
+    <div>
+      <ol class="parts">
+        <li><b>● 级别</b>严重度。颜色只落在 <code>●</code> 上，去掉颜色也完整可读。</li>
+        <li><b>? 标记</b>只有 <em>needs_review</em> 才有：结构上成立，但可能需要仓库外确认。</li>
+        <li><b>规则 id</b>形如 <code>类别/名称</code>，用 <code>wrasse rules show &lt;id&gt;</code> 看完整说明。</li>
+        <li><b>定位</b><code>44:9</code> 是第 44 行第 9 列，不是字节偏移。</li>
+        <li><b>行号 gutter</b>灰数字是上下文真实行号；<code>-</code> 用旧行号，<code>+</code> 用新行号。</li>
+        <li><b>红 / 绿</b>红是现状（逐字来自你的文件，密钥已脱敏）。绿行分三种标记：<code>+</code> 是已验证的替换，能直接粘贴；<code>~</code> 是模板，要按你的变量名和导入改；<code>!</code> 表示没有自动修复，需要人判断。</li>
+        <li><b>why / ? / →</b>一句人话 → 缺了什么 → 一条立即可跑的命令。</li>
+      </ol>
+    </div>
+  </div>
+  <h3>行号的三个细节</h3>
+  <ul>
+    <li><code>-</code> 和 <code>+</code> 用同一套行号：替换首行同号；多行插入时后面的行号依次递增。</li>
+    <li>上下文里如果<strong>跳过超过 3 行</strong>才到问题点，就不显示上下文——避免"看似连续其实跳了 200 行"。</li>
+    <li>多行调用被截断时，<code>-</code> 行末尾有 <code>…</code>，表示源码还有下文。</li>
+  </ul>
+</section>
+
+<section id="s6">
+  <h2><span class="num">06</span>严重度 vs 状态：两个不同的数字感</h2>
+  <p class="sub">这是 wrasse 和多数扫描器最不一样的地方。</p>
+  <table>
+    <tr><th></th><th>回答的问题</th><th>例子</th></tr>
+    <tr><td><strong>severity</strong></td><td>如果这条成立，后果多严重</td><td>越权读别人的订单 = high</td></tr>
+    <tr><td><strong>status</strong></td><td>我们有多大把握它真的成立</td><td>只看到静态结构，没看到别处的检查 = needs_review</td></tr>
+  </table>
+  <p>所以会出现 <span class="high b">HIGH</span> <span class="med">?</span> —— <strong>"很严重，但我不能替你确认"</strong>。这种条目：</p>
+  <ul>
+    <li>会出现在报告里（你该看一眼）</li>
+    <li>默认<strong>不会</strong>让 CI 失败（否则你迟早会关掉这个工具）</li>
+    <li><code>wrasse explain N</code> 会写清"缺哪条证据"</li>
+  </ul>
+  <p>反过来，<span class="crit b">CRITICAL</span> 后面没有 <code>?</code>，意味着证据链完整、可以直接改。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="num">07</span>尾部两行</h2>
+  <div class="term"><pre><span class="faint">────────────────────────────────────────────────────────────────────</span>
+  <span class="dim">next</span>  wrasse review   <span class="faint">·</span>   --format html -o report.html</pre></div>
+  <ul>
+    <li><code>wrasse review</code>：逐条过，处理 findings 的主入口</li>
+    <li><code>--format html</code>：生成一份可以发给别人的单文件报告</li>
+  </ul>
+  <p>如果这次有<strong>无法判定的部分</strong>，会多一行，退出码也会变成 4：</p>
+  <div class="term"><pre>  <span class="med">unknown:</span> <span class="dim">2 package(s) could not be checked (offline?)</span></pre></div>
+</section>
+
+<section id="s8">
+  <h2><span class="num">08</span>为什么条数会变</h2>
+  <table>
+    <tr><th>你看到的</th><th>原因</th></tr>
+    <tr><td><code>--focus privacy</code> 只有 <strong>4</strong> 条</td><td>只含 A 线规则：密钥、前端、日志、错误信息、上传、Agent 配置</td></tr>
+    <tr><td><code>--focus ai</code> 有 <strong>7</strong> 条</td><td>B 线：授权、数据流、依赖、配置</td></tr>
+    <tr><td><code>--mode quick</code> 只有 <strong>3</strong> 条</td><td>quick 不跑数据流，所以"上传路径"那条不出现</td></tr>
+    <tr><td>同一行只报一条</td><td>同一行命中多条规则时保留最具体的那条（密钥泄露优先于通用规则）</td></tr>
+    <tr><td>文件里有 <code>str(e)</code> 却没报</td><td>文档、示例、测试目录默认跳过；<code>.md</code> 里只查真实密钥格式</td></tr>
+  </table>
+</section>
+
+<section id="s9">
+  <h2><span class="num">09</span>退出码：CI 用这个判断</h2>
+  <table>
+    <tr><th>码</th><th>含义</th><th>CI 里怎么办</th></tr>
+    <tr><td><span class="ok b">0</span></td><td>干净</td><td>通过</td></tr>
+    <tr><td><strong>1</strong></td><td>用法错误 / 内部异常</td><td>报错，别当通过</td></tr>
+    <tr><td><span class="high b">2</span></td><td>有 finding 达到 <code>--fail-on</code>（默认 high）</td><td>拦截</td></tr>
+    <tr><td><strong>3</strong></td><td>不是可扫描的项目（路径不存在 / 没有源码）</td><td>报错</td></tr>
+    <tr><td><span class="med b">4</span></td><td><strong>扫描没跑完</strong>（依赖核验失败、某层异常）</td><td><strong>警告，不算通过</strong></td></tr>
+  </table>
+  <div class="callout warn"><strong>为什么要有 4。</strong>安全工具最坏的失败方式是沉默地失败——扫崩了却看起来"干净"。4 就是"我没跑完，别当成没问题"。</div>
+</section>
+
+<section id="s10">
+  <h2><span class="num">10</span>命令列表</h2>
+
+  <h3>日常四条</h3>
+  <table>
+    <tr><th>命令</th><th>作用</th></tr>
+    <tr><td><code>wrasse</code></td><td>进交互会话：清屏、显示上次扫描、输入框在两条横线之间</td></tr>
+    <tr><td><code>wrasse preflight .</code></td><td>打开陌生仓库之前：只看 Agent 配置，<strong>不执行任何命令</strong></td></tr>
+    <tr><td><code>wrasse audit .</code></td><td>扫描</td></tr>
+    <tr><td><code>wrasse review .</code></td><td>逐条过：数字选中、<code>enter</code> 打开、<code>y</code> 复制位置、<code>e</code> 复制提示词</td></tr>
+  </table>
+
+  <h3>跳转与解释</h3>
+  <table>
+    <tr><th>命令</th><th>作用</th></tr>
+    <tr><td><code>wrasse open 3</code></td><td>在编辑器打开第 3 条（也接受 <code>WR-7f21a</code> 这样的稳定 id）</td></tr>
+    <tr><td><code>wrasse explain 3</code></td><td>打印证据链、为什么成立/存疑、修复建议</td></tr>
+    <tr><td><code>wrasse rules</code></td><td>列出全部规则</td></tr>
+    <tr><td><code>wrasse rules show authz/query-without-owner</code></td><td>看某条规则的判定与提示词</td></tr>
+    <tr><td><code>wrasse doctor</code></td><td>环境自检：Python、规则数、编辑器</td></tr>
+  </table>
+
+  <h3><code>audit</code> 的全部参数</h3>
+  <table>
+    <tr><th>参数</th><th>取值</th><th>默认</th><th>说明</th></tr>
+    <tr><td><code>--mode</code></td><td><code>quick</code> / <code>standard</code></td><td>standard</td><td>跑多深</td></tr>
+    <tr><td><code>--focus</code></td><td><code>privacy</code> / <code>ai</code> / <code>all</code></td><td>all</td><td>只报哪条主线（过滤器，不改判定）</td></tr>
+    <tr><td><code>--format</code></td><td><code>text</code> / <code>json</code> / <code>sarif</code> / <code>html</code></td><td>text</td><td>四种读者</td></tr>
+    <tr><td><code>--output -o</code></td><td>文件路径</td><td>无</td><td>不写就输出到终端</td></tr>
+    <tr><td><code>--context</code></td><td>整数</td><td>2</td><td>上下各几行；0 关闭</td></tr>
+    <tr><td><code>--lang</code></td><td><code>en</code> / <code>zh</code></td><td>en</td><td>界面与规则文案</td></tr>
+    <tr><td><code>--fail-on</code></td><td><code>critical</code> … <code>none</code></td><td>high</td><td>决定退出码 2</td></tr>
+    <tr><td><code>--offline</code></td><td>开关</td><td>关</td><td>不联网；依赖判定记 unknown（退出码 4）</td></tr>
+    <tr><td><code>--include-tests</code></td><td>开关</td><td>关</td><td>连 <code>tests/</code> <code>fixtures/</code> 一起扫</td></tr>
+    <tr><td><code>--no-state</code></td><td>开关</td><td>关</td><td>不写 <code>.wrasse/last.json</code>（扫别人仓库用）</td></tr>
+    <tr><td><code>--no-color</code></td><td>开关</td><td>关</td><td>关掉颜色（<code>NO_COLOR=1</code> 等效）</td></tr>
+    <tr><td><code>--diff</code></td><td>git ref</td><td>关</td><td>只报相对该 ref 改动的行</td></tr>
+    <tr><td><code>--baseline</code></td><td>路径</td><td>.wrasse/baseline.json</td><td>抑制基线里的 finding，只报新增</td></tr>
+    <tr><td><code>--sarif</code></td><td>路径</td><td>关</td><td>读别的工具的 SARIF，同位置不重复报</td></tr>
+  </table>
+
+  <h3>会话里的命令</h3>
+  <table>
+    <tr><th>输入</th><th>作用</th></tr>
+    <tr><td><code>audit . --offline</code></td><td>等价于在终端跑 <code>wrasse audit . --offline</code>（完整命令直接可用）</td></tr>
+    <tr><td><code>/audit</code> <code>/review</code></td><td>简写</td></tr>
+    <tr><td><code>o 3</code> / <code>e 3</code></td><td>打开 / 复制提示词</td></tr>
+    <tr><td><code>1</code></td><td>直接打开第 1 条</td></tr>
+    <tr><td><code>/privacy</code> <code>/ai</code> <code>/all</code></td><td>切主线</td></tr>
+    <tr><td><code>?</code></td><td>命令列表</td></tr>
+    <tr><td><code>q</code></td><td>退出（<code>Ctrl-C</code>、<code>Ctrl-D</code> 同样）</td></tr>
+  </table>
+</section>
+
+<section id="s11">
+  <h2><span class="num">11</span>术语</h2>
+  <table>
+    <tr><th>词</th><th>意思</th></tr>
+    <tr><td><strong>finding</strong></td><td>一条问题记录，带位置、证据、修复建议</td></tr>
+    <tr><td><strong>A 线（privacy）</strong></td><td>"我的代码会不会把东西漏出去"</td></tr>
+    <tr><td><strong>B 线（ai）</strong></td><td>"AI 留下了哪些坑"</td></tr>
+    <tr><td><strong>confirmed</strong></td><td>证据完整，可以直接改（界面上不标）</td></tr>
+    <tr><td><strong>needs_review</strong></td><td>结构上成立，但可能需要仓库外确认（界面标 <span class="med">?</span>，不拦 CI）</td></tr>
+    <tr><td><strong>unknown</strong></td><td>这次没能判定——不是"没问题"</td></tr>
+    <tr><td><strong>--fail-on</strong></td><td>达到这个严重度就让退出码变成 2</td></tr>
+  </table>
+</section>
+
+<section id="s12">
+  <h2><span class="num">12</span>这份报告<strong>不能</strong>告诉你的</h2>
+  <div class="callout">
+    <ul style="margin:0">
+      <li>运行时行为：值到底有没有真的写进日志、有没有真的发出去</li>
+      <li>仓库之外的防护：网关鉴权、WAF、部署层的限流</li>
+      <li>"这段代码是不是 AI 写的"：wrasse 不判断作者，只查那类 AI 反复犯的错——人写了同样的代码，一样会报</li>
+    </ul>
+  </div>
+  <p>这三件事写进了每条 <code>needs_review</code> 的说明里。看到 <span class="med">?</span>，就是让你去确认这三类东西。</p>
+</section>
+
+<footer>
+  wrasse 1.0.0-beta · 纯标准库 · 不联网、不调模型 · 报告里的每个数字都来自你自己的代码
+</footer>
+
+</main>
+</div>
+</body>
+</html>
